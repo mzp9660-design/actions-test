@@ -18,31 +18,25 @@ jobs:
 
       - name: Run Python
         run: |
-          python - <<'PY'
-          import csv
+          import urllib.request
+          import json
 
-          with open("data.csv", newline="") as f:
-              rows = list(csv.DictReader(f))
+          url = "https://jsonplaceholder.typicode.com/todos/1"
 
-          scores = [int(row["score"]) for row in rows]
+          with urllib.request.urlopen(url) as response:
+              data = json.loads(response.read().decode("utf-8"))
 
-          average = sum(scores) / len(scores)
-          highest = max(scores)
-          lowest = min(scores)
+          report = f"""公开数据获取报告
 
-          report = f"""数据统计报告
-
-          科目数量：{len(scores)}
-          平均分：{average:.2f}
-          最高分：{highest}
-          最低分：{lowest}
+          数据编号：{data['id']}
+          标题：{data['title']}
+          是否完成：{data['completed']}
           """
 
-          with open("report.txt", "w") as f:
+          with open("report.txt", "w", encoding="utf-8") as f:
               f.write(report)
 
           print(report)
-          PY
 
       - name: Commit changes
         run: |
