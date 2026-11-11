@@ -18,6 +18,7 @@ jobs:
 
       - name: Run Python
         run: |
+          python - <<'PY'
           import urllib.request
           import json
 
@@ -37,6 +38,7 @@ jobs:
               f.write(report)
 
           print(report)
+          PY
 
       - name: Commit changes
         run: |
