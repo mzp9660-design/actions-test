@@ -1,26 +1,53 @@
-        - name: Run Python
-          run: |
-            import csv
 
-            with open("data.csv", newline="") as f:
-                rows = list(csv.DictReader(f))
+name: Python Test
 
-            scores = [int(row["score"]) for row in rows]
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "0 0 * * *"
 
-            average = sum(scores) / len(scores)
-            highest = max(scores)
-            lowest = min(scores)
+permissions:
+  contents: write
 
-            report = f"""数据统计报告
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v5
 
-            科目数量：{len(scores)}
-            平均分：{average:.2f}
-            最高分：{highest}
-            最低分：{lowest}
-            """
+      - name: Run Python
+        run: |
+          python - <<'PY'
+          import csv
 
-            with open("report.txt", "w") as f:
-                f.write(report)
+          with open("data.csv", newline="") as f:
+              rows = list(csv.DictReader(f))
 
-            print(report)
-          shell: python
+          scores = [int(row["score"]) for row in rows]
+
+          average = sum(scores) / len(scores)
+          highest = max(scores)
+          lowest = min(scores)
+
+          report = f"""数据统计报告
+
+          科目数量：{len(scores)}
+          平均分：{average:.2f}
+          最高分：{highest}
+          最低分：{lowest}
+          """
+
+          with open("report.txt", "w") as f:
+              f.write(report)
+
+          print(report)
+          PY
+
+      - name: Commit changes
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add report.txt
+          git diff --cached --quiet || git commit -m "Generate Python report"
+          git push
