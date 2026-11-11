@@ -1,5 +1,5 @@
 
-name: Daily Backup Test
+name: Python Test
 
 on:
   workflow_dispatch:
@@ -16,14 +16,27 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Update backup file
+      - name: Run Python
         run: |
-          date -u +"Last run: %Y-%m-%d %H:%M:%S UTC" > backup.txt
+          python - <<'PY'
+          from datetime import datetime, timezone
+
+          now = datetime.now(timezone.utc)
+          report = f"""Python test successful!
+          Run time: {now}
+          Message: Hello from GitHub Actions.
+          """
+
+          with open("report.txt", "w") as f:
+              f.write(report)
+
+          print(report)
+          PY
 
       - name: Commit changes
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add backup.txt
-          git diff --cached --quiet || git commit -m "Update backup"
+          git add report.txt
+          git diff --cached --quiet || git commit -m "Generate Python report"
           git push
